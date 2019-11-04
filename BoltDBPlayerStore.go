@@ -34,5 +34,15 @@ func (b *BoltDBPlayerStore) GetPlayerScore(name string) int {
 }
 
 func (b *BoltDBPlayerStore) RecordWin(name string) {
-
+	b.db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte("PlayerScore"))
+		if err != nil {
+			return err
+		}
+		v := b.Get([]byte(name))
+		currScore, _ := strconv.Atoi(string(v))
+		currScore += 1
+		err = b.Put([]byte(name), []byte(strconv.Itoa(currScore)))
+		return err
+	})
 }
