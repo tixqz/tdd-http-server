@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/boltdb/bolt"
 	"log"
+	"strconv"
 )
 
 type BoltDBPlayerStore struct {
@@ -21,13 +22,15 @@ func NewBoltDBPlayerStore() *BoltDBPlayerStore {
 }
 
 func (b *BoltDBPlayerStore) GetPlayerScore(name string) int {
+	var score int
 	b.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("PlayerScore"))
 		v := b.Get([]byte(name))
-		return v
+		score, _ = strconv.Atoi(string(v))
+		return nil
 	})
 
-	return
+	return score
 }
 
 func (b *BoltDBPlayerStore) RecordWin(name string) {
