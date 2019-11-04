@@ -1,14 +1,25 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
-
-	"github.com/boltdb/bolt"
 )
 
 func main() {
-	server := &PlayerServer{NewInMemoryPlayerStore()}
+	var server *PlayerServer
+	store := flag.String("store", "in-memory", "players' score storage")
+
+	flag.Parse()
+
+	switch *store {
+	case "in-memory":
+		server = &PlayerServer{NewInMemoryPlayerStore()}
+	case "boltdb":
+		server = &PlayerServer{NewBoltDBPlayerStore()}
+	default:
+		log.Fatal("Wrong store type")
+	}
 
 	errServer := http.ListenAndServe(":5000", server)
 
