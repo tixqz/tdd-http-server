@@ -3,14 +3,16 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/boltdb/bolt"
 )
 
 func main() {
-	server := &PlayerServer{&InMemoryPlayerStore{}}
+	server := &PlayerServer{NewInMemoryPlayerStore()}
 
-	err := http.ListenAndServe(":5000", server)
+	errServer := http.ListenAndServe(":5000", server)
 
-	if err != nil {
-		log.Fatalf("couldn't listen to port :5000 %v", err)
+	if errServer != nil {
+		log.Fatalf("couldn't listen to port :5000 %v", errServer)
 	}
 }
