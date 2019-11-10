@@ -14,9 +14,9 @@ func main() {
 
 	switch *store {
 	case "in-memory":
-		server = &PlayerServer{NewInMemoryPlayerStore()}
+		server = NewPlayerServer(NewInMemoryPlayerStore())
 	case "boltdb":
-		server = &PlayerServer{NewBoltDBPlayerStore()}
+		server = NewPlayerServer(NewBoltDBPlayerStore())
 	default:
 		log.Fatal("Wrong store type")
 	}
