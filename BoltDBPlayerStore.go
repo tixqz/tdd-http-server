@@ -46,3 +46,7 @@ func (b *BoltDBPlayerStore) RecordWin(name string) {
 		return err
 	})
 }
+
+func (b *BoltDBPlayerStore) GetLeague() []Player {
+	return nil
+}

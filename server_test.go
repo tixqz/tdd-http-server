@@ -5,17 +5,23 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
 type StubPlayerStore struct {
 	scores   map[string]int
 	winCalls []string
+	league   []Player
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
 	score := s.scores[name]
 	return score
+}
+
+func (s *StubPlayerStore) GetLeague() []Player {
+	return s.league
 }
 
 func (s *StubPlayerStore) RecordWin(name string) {
@@ -28,6 +34,7 @@ func TestGETPlayers(t *testing.T) {
 			"Pepper": 20,
 			"Floyd":  10,
 		},
+		nil,
 		nil,
 	}
 	server := NewPlayerServer(&store)
@@ -73,6 +80,7 @@ func TestStoreWins(t *testing.T) {
 	store := StubPlayerStore{
 		map[string]int{},
 		nil,
+		nil,
 	}
 	server := NewPlayerServer(&store)
 
@@ -106,10 +114,16 @@ func TestStoreWins(t *testing.T) {
 }
 
 func TestLeague(t *testing.T) {
-	store := StubPlayerStore{}
-	server := NewPlayerServer(&store)
+	t.Run("it return league as JSON", func(t *testing.T) {
+		wantedLeague := []Player{
+			{"Stacye", 17},
+			{"John", 23},
+			{"John", 15},
+		}
 
-	t.Run("it returns 200 on /league", func(t *testing.T) {
+		store := StubPlayerStore{nil, nil, wantedLeague}
+		server := NewPlayerServer(&store)
+
 		request, _ := http.NewRequest(http.MethodGet, "/league", nil)
 		response := httptest.NewRecorder()
 
@@ -124,6 +138,14 @@ func TestLeague(t *testing.T) {
 		}
 
 		assertStatusCode(t, response.Code, http.StatusOK)
+
+		if !reflect.DeepEqual(got, wantedLeague) {
+			t.Fatalf("got %v want %v", got, wantedLeague)
+		}
+
+		if response.Result().Header.Get("content-type") != "application/json" {
+			t.Fatalf("response did not have content-type of application/json, got %v", response.Result().Header)
+		}
 	})
 }
 
