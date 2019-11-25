@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -27,6 +28,23 @@ func (s *StubPlayerStore) GetLeague() []Player {
 
 func (s *StubPlayerStore) RecordWin(name string) {
 	s.winCalls = append(s.winCalls, name)
+}
+
+func TestFileSystemStore(t *testing.T) {
+	database := strings.NewReader(`[
+		{"Name": "Cleo", "Wins": 10},
+		{"Name": "Chris", "Wins": 33}]`)
+
+	store := FileSystemPlayerStore{database}
+
+	got := store.GetLeague()
+
+	want := []Player{
+		{"Cleo", 10},
+		{"Chris", 33},
+	}
+
+	assertLeague(t, got, want)
 }
 
 func TestGETPlayers(t *testing.T) {
